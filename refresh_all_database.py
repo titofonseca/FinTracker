@@ -1,4 +1,5 @@
 # Import custom scripts
+from scripts import delete_and_recreate_tables  # Importa o novo script
 from scripts import reit_info, recent_price, historic_price, historic_dividend
 import scripts.pick_tickers as pick_tickers
 import scripts.latest_data as latest_data_script
@@ -17,6 +18,9 @@ async def refresh_all_database():
     """
 
     logging.info("Starting database update process")
+
+    # Call delete_and_recreate_tables before updating any data
+    delete_and_recreate_tables.delete_and_recreate_tables()
 
     # Call the pick_tickers first (uncomment if needed)
     await pick_tickers.main()
