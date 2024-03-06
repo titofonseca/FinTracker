@@ -166,7 +166,7 @@ def dashboard():
             acquisition['ex_div_minus_one'] = None
 
     # Calcular o balanço geral
-    total_profit_loss = portfolio['total_profit_loss'] if portfolio['total_profit_loss'] is not None else 0
+    total_profit_loss = portfolio['total_profit_loss'] if portfolio and portfolio['total_profit_loss'] is not None else 0
     total_dividends = dividends_history_data['total_dividends'] if dividends_history_data['total_dividends'] is not None else 0
     overall_balance = total_profit_loss + total_dividends
 
@@ -175,9 +175,9 @@ def dashboard():
 
     # Preparar dados de balanço de investimentos para o frontend
     balance_investments_data = {
-        'cash_balance': "{:.2f}".format(portfolio['cash_balance'] if portfolio['cash_balance'] is not None else 0),
-        'total_investment': "{:.2f}".format(portfolio['total_investment'] if portfolio['total_investment'] is not None else 0),
-        'total_current_value': "{:.2f}".format(portfolio['total_current_value'] if portfolio['total_current_value'] is not None else 0),
+        'cash_balance': "{:.2f}".format(portfolio['cash_balance'] if portfolio and portfolio['cash_balance'] is not None else 0),
+        'total_investment': "{:.2f}".format(portfolio['total_investment'] if portfolio and portfolio['total_investment'] is not None else 0),
+        'total_current_value': "{:.2f}".format(portfolio['total_current_value'] if portfolio and portfolio['total_current_value'] is not None else 0),
         'total_profit_loss': format_with_sign(total_profit_loss),
         'overall_balance': format_with_sign(overall_balance)
     }
