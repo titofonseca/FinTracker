@@ -19,7 +19,7 @@ async def refresh_all_database():
     logging.info("Starting database update process")
 
     # Call the pick_tickers first (uncomment if needed)
-    # await pick_tickers.main()
+    await pick_tickers.main()
 
     # Update each section of the database
     await update_section(reit_info.main, "REIT information")
