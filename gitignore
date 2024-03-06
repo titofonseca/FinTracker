@@ -1,0 +1,15 @@
+# Ambiente Virtual
+reit_app_venv/
+
+# Arquivos de Banco de Dados
+db/database.db
+
+# Arquivos de Configuração Sensíveis
+.env
+
+# Bytecode Python compilado
+__pycache__/
+*.pyc
+
+# Outros arquivos e pastas ignorados
+.DS_Store  # Para usuários de Mac

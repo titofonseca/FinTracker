@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Form for data entry -->
+            <div class="col-lg-6">
+                <div class="my-4">
+                    <h2>Add New Dividend</h2>
+                    <form method="post" action="{{ url_for('dividends') }}" class="p-3 border rounded">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="data" class="form-control" required placeholder="Enter the date">
+                        </div>
+                        <div class="form-group">
+                            <label for="ticker">REIT</label>
+                            <input type="text" id="ticker" name="ticker" class="form-control" required placeholder="Enter the REIT ticker">
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" class="form-control" step="0.01" required placeholder="Enter the dividend amount in USD">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Dividend</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Table to display dividend history -->
+            <div class="col-lg-6">
+                <div class="my-4">
+                    <h2>Dividend History</h2>
+                    <table class="table table-hover transaction-history-table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>REIT</th>
+                                <th>Amount</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dividend in dividends %}
+                            <tr>
+                                <td>{{ dividend.data }}</td>
+                                <td>{{ dividend.ticker }}</td>
+                                <td>${{ "%.2f"|format(dividend.amount) }}</td>
+                                <td>
+                                    <form method="post" action="{{ url_for('delete_dividend', id=dividend.id) }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

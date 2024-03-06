@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REIT Investment App</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    {% block links %}{% endblock %}
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Barra de Navegação Superior -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark top-bar">
+            <div class="container-fluid">
+                <!-- Logo -->
+                <a class="navbar-brand" href="{{ url_for('index') }}">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" height="30">
+                </a>
+
+                <!-- Botão de Toggle para dispositivos móveis -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Itens da Navbar -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <!-- Ícones de Navegação -->
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('wallet') }}">Buy / Sell</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('dividends') }}">Recieved Dividends</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('account_movements') }}">Deposits / Withdrawals</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item" style="padding-left: 20px;">
+                        <a href="javascript:void(0);" id="refreshDatabaseButton" class="nav-link">
+                            <i class="fas fa-database"></i> All
+                        </a>
+                    </div>
+                    <div class="nav-item" style="padding-left: 20px;">
+                        <a href="javascript:void(0);" id="refreshButton" class="nav-link">
+                            <i class="fas fa-sync-alt"></i> Fast
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+        </nav>
+
+        <!-- Conteúdo Principal -->
+        <div class="container-fluid mt-4 content">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        <!-- Rodapé -->
+        <footer class="bg-dark text-white text-center py-3 footer">
+            <p>&copy; {{ current_year }} REIT Investment App</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap e jQuery Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            // Botão para atualizar as tabelas
+            $('#refreshButton').click(function(event) {
+            
+                event.preventDefault();
+                var btn = $(this);
+                btn.html('<i class="fas fa-sync-alt fa-spin"></i>'); // Muda para ícone giratório
+                btn.addClass('active');
+    
+                refreshTables().then(function() {
+                    btn.removeClass('active');
+                    btn.html('<i class="fas fa-check"></i>');
+                    setTimeout(function() {
+                        btn.html('<i class="fas fa-sync-alt"></i>'); // Retorna ao ícone original
+                    }, 2000);
+                }).catch(function() {
+                    btn.html('<i class="fas fa-sync-alt"></i>'); // Retorna ao ícone original em caso de erro
+                    btn.removeClass('active');
+                    alert('Erro ao atualizar as tabelas.');
+                });
+            });
+    
+            function refreshTables() {
+                return fetch('/refresh_all_tables', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Erro na resposta do servidor');
+                        }
+                    });
+            }
+    
+            // Botão para atualizar o banco de dados
+            $('#refreshDatabaseButton').click(function(event) {
+                event.preventDefault();
+                var btn = $(this);
+                btn.html('<i class="fas fa-sync-alt fa-spin"></i>'); // Muda para ícone giratório
+                btn.addClass('active');
+    
+                refreshDatabase().then(function() {
+                    btn.removeClass('active');
+                    btn.html('<i class="fas fa-check"></i>');
+                    setTimeout(function() {
+                        btn.html('<i class="fas fa-database"></i>'); // Retorna ao ícone original
+                    }, 2000);
+                }).catch(function() {
+                    btn.html('<i class="fas fa-database"></i>'); // Retorna ao ícone original em caso de erro
+                    btn.removeClass('active');
+                    alert('Erro ao atualizar o banco de dados.');
+                });
+            });
+    
+            function refreshDatabase() {
+                return fetch('/refresh_all_database', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Erro na resposta do servidor');
+                        }
+                    });
+            }
+    
+            // Botão para atualizar os preços
+            $('#refreshPricesButton').click(function(event) {
+                event.preventDefault();
+                var btn = $(this);
+                btn.html('<i class="fas fa-sync-alt fa-spin"></i>'); // Muda para ícone giratório
+                btn.addClass('active');
+    
+                refreshPrices().then(function() {
+                    btn.removeClass('active');
+                    btn.html('<i class="fas fa-check"></i>');
+                    setTimeout(function() {
+                        btn.html('<i class="fas fa-dollar-sign"></i>'); // Retorna ao ícone original de moedas
+                    }, 2000);
+                }).catch(function() {
+                    btn.html('<i class="fas fa-dollar-sign"></i>'); // Retorna ao ícone original em caso de erro
+                    btn.removeClass('active');
+                    alert('Erro ao atualizar os preços.');
+                });
+            });
+    
+            function refreshPrices() {
+                return fetch('/refresh_prices', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Erro na resposta do servidor');
+                        }
+                    });
+            }
+        });
+    </script>
+    
+
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

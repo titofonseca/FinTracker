@@ -1,0 +1,540 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-around">
+        <!-- KPI Cards -->
+        {% set kpis = [
+            ('Cash Flow', balance_investments_data.cash_balance, 'cash-icon.png'),
+            ('Full Investment', balance_investments_data.total_investment, 'investment-icon.png'),
+            ('Current Value', balance_investments_data.total_current_value, 'wallet-icon.png'),
+            ('P/L Absolute', balance_investments_data.total_profit_loss, 'profit-loss-icon.png'),
+            ('Overall Balance', balance_investments_data.overall_balance, 'overall-balance-icon.png')
+        ] %}
+
+        {% for title, value, icon in kpis %}
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+            <div class="card kpi-card h-100">
+                <div class="kpi-card-body">
+                    <img class="kpi-icon" src="{{ url_for('static', filename='icons/' ~ icon) }}" alt="{{ title }}" />
+                    <div class="kpi-title">{{ title }}</div>
+                    <div class="kpi-value">{{ value }} $</div>
+                    <div class="kpi-chart-container">
+                        <canvas id="kpiGraph{{ loop.index }}"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Investment Performance Section - Full width -->
+    <div class="row">
+        <div class="col-md-12 col-sm-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Investment Performance</h5>
+                    <p class="info-text">
+                        <i class="fas fa-info-circle"></i>
+                        Detailed information about your investments:
+                    </p>
+                    <div class="investment-performance-container">
+                        {% for reit in investment_performance_data %}
+                        {% if reit.amount_in_wallet > 0 %}
+                            <div class="investment-row">
+                                <!-- Icon and Ticker -->
+                                <div class="investment-cell-icon-ticker">
+                                    <img class="investment-icon rounded-circle" src="{{
+                                        reit.icon_url if reit.icon_url else
+                                        reit.logo_url if reit.logo_url else
+                                        url_for('static', filename='dolar.png')
+                                    }}" alt="{{ reit.ticker }} Icon">
+                                    <div class="investment-ticker">{{ reit.ticker }}</div>
+                                </div>
+                                <!-- Quantity -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Quantity</div>
+                                    <div class="metric-value">{{ reit.amount_in_wallet }}</div>
+                                </div>
+                                <!-- Invested -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Investment</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.total_investment) }}</div>
+                                </div>
+                                <!-- Buy Price -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Buy Price</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.highest_initial_price) }}</div>
+                                </div>
+                                <!-- Value -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Value</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.current_value) }}</div>
+                                </div>
+                                <!-- Price -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Last Price</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.latest_price) }}</div>
+                                </div>                                
+                                <!-- Hold Until -->
+                                <div class="investment-cell hold-until-cell">
+                                    <div class="metric-title">Hold Until</div>
+                                    <div class="metric-value">
+                                        {% if reit.latest_record_date %}
+                                        {{ reit.latest_record_date }}
+                                        <br>
+                                        {% endif %}
+                                        <span class="small-date">{{ format_days(reit.days_until_latest_record_date) }}</span>
+                                    </div>
+                                </div>
+                                <!-- Cash On -->
+                                <div class="investment-cell cash-on-cell">
+                                    <div class="metric-title">Cash On</div>
+                                    <div class="metric-value">
+                                        {% if reit.latest_pay_date %}
+                                        {{ reit.latest_pay_date }}
+                                        <br>
+                                        {% endif %}
+                                        <span class="small-date">{{ format_days(reit.days_until_latest_pay_date) }}</span>
+                                    </div>
+                                </div>
+                                 <!-- P/L -->
+                                 <div class="investment-cell">
+                                    <div class="metric-title">Profit/Loss</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.profit_loss) }}</div>
+                                </div>
+                                <!-- Expected Dividend -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Dividend</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.expected_dividend) }}</div>
+                                </div>
+                                <!-- Current LLV -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Balance</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.current_llv) }}</div>
+                                </div>
+                                <!-- Status -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Status</div>
+                                    <div class="metric-value">{{ reit.status }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REIT Performance Section -->
+        <div class="row">
+            <div class="col-md-12 col-sm-12 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            REIT Performance
+                            <i class="fas fa-info-circle" title="Information about the current performance of your REITs including calculated target prices for different profit percentages."></i>
+                        </h5>
+                        <p class="info-text">
+                            This section provides a detailed view of the performance of your REITs, including the break-even point and projected prices for various profit targets.
+                        </p>
+                        <div class="investment-performance-container">
+                            {% for reit in reit_performance %}
+                            <div class="investment-row">
+                                <!-- Icon and Ticker -->
+                                <div class="investment-cell-icon-ticker">
+                                    <img class="investment-icon rounded-circle" src="{{
+                                        reit.icon_url if reit.icon_url else
+                                        reit.logo_url if reit.logo_url else
+                                        url_for('static', filename='dolar.png')
+                                    }}" alt="{{ reit.ticker }} Icon">
+                                    <div class="investment-ticker">{{ reit.ticker }}</div>
+                                </div>
+                                <!-- Buy Price -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Buy Price</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.initial_price) }}</div>
+                                </div>
+                                <!-- Dividend -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Dividend</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.dividend_per_share) }}</div>
+                                </div>
+                                <!-- Price Now -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Price Now</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.latest_price) }}</div>
+                                </div>
+                                <!-- Separator -->
+                                <div class="investment-cell-separator"></div>
+                                <!-- Break Even -->
+                                <div class="investment-cell">
+                                    <div class="metric-title">Break Even</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(reit.break_even) }}</div>
+                                </div>
+                                <!-- Prices for different profit percentages -->
+                                {% for percent, price in reit.scaled_prices.items() if percent < 100 %}
+                                <div class="investment-cell">
+                                    <div class="metric-title">{{ percent }}% Price</div>
+                                    <div class="metric-value">${{ "%0.2f"|format(price) }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dividends Section - Split into four parts -->
+
+        <!-- Total Dividends Cashed and Graph -->
+        <div class="col-md-6 col-sm-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Dividends Cashed</h5>
+                    <div class="kpi-value">
+                        ${{ "%0.2f"|format(dividends_history_data.total_dividends) }}
+                    </div>
+                    <div class="dividend-chart-container">
+                        <canvas id="dividendsHistoryGraph"></canvas>
+                    </div> 
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Qualified Future Dividends -->
+        <div class="col-md-6 col-sm-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Qualified Future Dividends</h5>
+                    <div class="dividend-list-container" style="overflow-y: auto; max-height: 300px;">
+                        {% for dividend in future_dividends_data %}
+                        <div class="investment-row">
+                            <div class="investment-cell-icon-ticker">
+                                <img class="investment-icon rounded-circle" src="{{
+                                    dividend['icon_url'] if dividend['icon_url'] else
+                                    dividend['logo_url'] if dividend['logo_url'] else
+                                    url_for('static', filename='dolar.png')
+                                }}" alt="{{ dividend['ticker'] }} Icon">
+                                <div class="investment-ticker">{{ dividend['ticker'] }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Pay Date</div>
+                                <div class="metric-value">{{ dividend['pay_date'] }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Amount</div>
+                                <div class="metric-value">
+                                    +${{ "%0.2f"|format(dividend['total_dividend_amount']) }}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p>No future dividends qualified at this time.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Dividends -->
+        <div class="col-md-6 col-sm-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Dividends</h5>
+                    <div class="dividend-list-container" style="overflow-y: auto; max-height: 300px;">
+                        {% for dividend in dividends_history_data.recent_dividends[:5] %}
+                        <div class="investment-row">
+                            <div class="investment-cell-icon-ticker">
+                                <img class="investment-icon rounded-circle" src="{{
+                                    dividend.icon_url if dividend.icon_url else
+                                    dividend.logo_url if dividend.logo_url else
+                                    url_for('static', filename='dolar.png')
+                                }}" alt="{{ dividend.ticker }} Icon">
+                                <div class="investment-ticker">{{ dividend.ticker }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Date</div>
+                                <div class="metric-value">{{ dividend.data }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Amount</div>
+                                <div class="metric-value">
+                                    +${{ "%0.2f"|format(dividend.amount) }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Purchases -->
+        <div class="col-md-6 col-sm-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Next Purchases</h5>
+                    <div class="investment-list-container" style="overflow-y: auto; max-height: 300px;">
+                        {% for purchase in next_purchases_data %}
+                        <div class="investment-row">
+                            <div class="investment-cell-icon-ticker">
+                                <img class="investment-icon rounded-circle" src="{{
+                                    purchase.icon_url if purchase.icon_url else
+                                    purchase.logo_url if purchase.logo_url else
+                                    url_for('static', filename='dolar.png')
+                                }}" alt="{{ purchase.ticker }} Icon">
+                                <div class="investment-ticker">{{ purchase.ticker }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Buy On</div>
+                                <div class="metric-value">{{ purchase.buy_on }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Sell On</div>
+                                <div class="metric-value">{{ purchase.sell_on }}</div>
+                            </div>
+                            <div class="investment-cell">
+                                <div class="metric-title">Predicted Dividend</div>
+                                <div class="metric-value">
+                                    +${{ "%0.2f"|format(purchase.predicted_dividend) }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    <!-- Upcoming Acquisitions Section -->
+    <div class="row">
+        <div class="col-md-12 col-sm-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Acquisitions</h5>
+                    <p class="info-text">
+                        <i class="fas fa-info-circle"></i>
+                        Key dates for understanding dividends:
+                    </p>
+                    <ul class="info-text">
+                        <li><strong>Ex Div Date:</strong> Deadline to own shares for the next dividend. Own shares before this date to qualify for dividends. Example: 'Today' means the deadline is today.</li>
+                        <li><strong>Record Date:</strong> Date when eligible shareholders for dividends are determined. Example: 'Tomorrow' indicates the record date is the next day.</li>
+                        <li><strong>Pay Date:</strong> Date when dividends are paid out. Example: '5 days left' means dividends will be paid in 5 days.</li>
+                    </ul>
+                    <div class="acquisition-performance-container">
+                        {% for acquisition in upcoming_acquisitions_data %}
+                        {% if acquisition.ranking is number %}
+                        <div class="acquisition-row">
+                            <!-- Rank -->
+                            <div class="acquisition-cell rank-cell">
+                                <div class="metric-title">Rank</div>
+                                <div class="metric-value">{{ acquisition.ranking }}</div>
+                            </div>
+                            <!-- Icon and Ticker -->
+                            <div class="acquisition-cell-icon-ticker">
+                                <img class="acquisition-icon rounded-circle" src="{{
+                                    acquisition.icon_url if acquisition.icon_url else
+                                    acquisition.logo_url if acquisition.logo_url else
+                                    url_for('static', filename='dolar.png')
+                                }}" alt="{{ acquisition.ticker }} Icon">
+                                <div class="acquisition-ticker">{{ acquisition.ticker }}</div>
+                            </div>
+                            <!-- Name -->
+                            <div class="acquisition-cell name-cell">
+                                <div class="metric-title">Name</div>
+                                <div class="metric-value truncate-1-line">{{ acquisition.name }}</div>
+                            </div>
+                            <!-- Buy on -->
+                            <div class="acquisition-cell date-cell">
+                                <div class="metric-title">Buy on</div>
+                                <div class="metric-value">
+                                    {% if acquisition.ex_div_minus_one %}
+                                    {{ acquisition.ex_div_minus_one }}
+                                    <br>
+                                    {% endif %}
+                                    <span class="small-date">Ex Div: {{ acquisition.next_ex_dividend_date }}</span>
+                                </div>
+                            </div>
+                            <!-- Hold Until -->
+                            <div class="acquisition-cell date-cell">
+                                <div class="metric-title">Sell on</div>
+                                <div class="metric-value">
+                                    {% if acquisition.next_record_date %}
+                                    in {{ format_days(acquisition.days_until_next_record_date) }}
+                                    <br>
+                                    {% endif %}
+                                    <span class="small-date">{{ acquisition.next_record_date }}</span>
+                                </div>
+                            </div>
+                            <!-- Cash On -->
+                            <div class="acquisition-cell date-cell">
+                                <div class="metric-title">Cash on</div>
+                                <div class="metric-value">
+                                    {% if acquisition.next_pay_date %}
+                                    {{ acquisition.next_pay_date }}
+                                    <br>
+                                    {% endif %}
+                                    <span class="small-date">{{ format_days(acquisition.days_until_next_pay_date) }}</span>
+                                </div>
+                            </div>
+                            <!-- Possible Qty -->
+                            <div class="acquisition-cell">
+                                <div class="metric-title">Predicted Qty</div>
+                                <div class="metric-value">{{ "%0.5f"|format(acquisition.possible_buying_amount) }}</div>
+                            </div>
+                            <!-- Predicted Div -->
+                            <div class="acquisition-cell">
+                                <div class="metric-title">Predicted Div</div>
+                                <div class="metric-value">${{ "%0.5f"|format(acquisition.predicted_dividend) }}</div>
+                            </div>
+                            <!-- Div/Day -->
+                            <div class="acquisition-cell">
+                                <div class="metric-title">Predicted Div/Day</div>
+                                <div class="metric-value">${{ "%0.5f"|format(acquisition.dividend_per_day) }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var cardGraphData = {{ card_graph_data | tojson | safe }};
+
+        // Função para formatar os dias até as datas importantes
+        window.format_days = function(days) {
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Tomorrow';
+            return days + ' days left';
+        }
+        
+        function createSparkline(elementId, data, valueKey) {
+            const ctx = document.getElementById(elementId).getContext('2d');
+            const labels = data.map(item => item.date);
+            const values = data.map(item => item[valueKey]);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        if (cardGraphData) {
+            createSparkline('kpiGraph1', cardGraphData.cash_flow, 'cash_balance');
+            createSparkline('kpiGraph2', cardGraphData.full_investment, 'total_investment');
+            createSparkline('kpiGraph3', cardGraphData.current_value, 'total_current_value');
+            createSparkline('kpiGraph4', cardGraphData.pl_absolute, 'total_profit_loss');
+            createSparkline('kpiGraph5', cardGraphData.overall_balance, 'total_profit_loss + total_dividend_cashed');
+        } else {
+            console.error("Card Graph Data not available.");
+        }
+
+        // Dados do gráfico de histórico de dividendos
+        var dividendsHistoryData = {{ dividends_history_graph | tojson | safe }};
+
+        // Função para gerar uma lista contínua de datas
+        function getContinuousDates(startDate, endDate) {
+            for(var arr=[], dt=new Date(startDate); dt<=endDate; dt.setDate(dt.getDate()+1)){
+                arr.push(new Date(dt).toISOString().split('T')[0]);
+            }
+            return arr;
+        }
+
+        // Processar os dados para serem cumulativos
+        function processCumulativeDividends(data) {
+            const dividendsMap = new Map(data.map(item => [item.date, item.total_amount]));
+            const minDate = new Date(Math.min(...data.map(e => new Date(e.date))));
+            const maxDate = new Date(Math.max(...data.map(e => new Date(e.date))));
+            const allDates = getContinuousDates(minDate, maxDate);
+
+            let cumulativeValue = 0;
+            return allDates.map(date => {
+                if(dividendsMap.has(date)) {
+                    cumulativeValue += dividendsMap.get(date);
+                }
+                return { date: date, total_amount: cumulativeValue };
+            });
+        }
+
+        // Criar o gráfico de histórico de dividendos
+        function createDividendsHistoryGraph() {
+            const ctx = document.getElementById('dividendsHistoryGraph').getContext('2d');
+            const processedData = processCumulativeDividends(dividendsHistoryData);
+            const labels = processedData.map(item => item.date);
+            const values = processedData.map(item => item.total_amount);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chamar a função para criar o gráfico de histórico de dividendos
+        createDividendsHistoryGraph();
+
+        
+    });
+</script>
+{% endblock %}

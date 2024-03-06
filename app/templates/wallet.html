@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class=" container-fluid">
+        <div class="row">
+            <!-- Form for data entry -->
+            <div class="col-lg-6">
+                <div class="my-4">
+                    <h2>Add New Transaction</h2>
+                    <form method="post" action="{{ url_for('wallet') }}" class="p-3 border rounded">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="data" class="form-control" required placeholder="Enter the date">
+                        </div>
+                        <div class="form-group">
+                            <label for="ticker">REIT</label>
+                            <input type="text" id="ticker" name="ticker" class="form-control" required placeholder="Enter the REIT ticker">
+                        </div>
+                        <div class="form-group">
+                            <label for="move">Buy/Sell</label>
+                            <select id="move" name="movimento" class="form-control" required>
+                                <option value="Compra">Compra</option>
+                                <option value="Venda">Venda</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="initialBuyPrice">Price</label>
+                            <input type="number" id="initialBuyPrice" name="preco_inicial" class="form-control" step="0.01" required placeholder="Enter the price in USD">
+                        </div>
+                        <div class="form-group">
+                            <label for="initialBuyAmount">Amount</label>
+                            <input type="number" id="initialBuyAmount" name="quantidade_inicial" class="form-control" step="0.00001" required placeholder="Enter the amount">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Table to display transactions -->
+            <div class="col-lg-6">
+                <div class="wallet-table my-4 overflow">
+                    <h2>Transaction History</h2>
+                    <table class="table table-hover transaction-history-table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>REIT</th>
+                                <th>Buy/Sell</th>
+                                <th>Price</th>
+                                <th>Amount</th>
+                                <th>Balance</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reit in reits %}
+                            <tr>
+                                <td>{{ reit.data }}</td>
+                                <td>{{ reit.ticker }}</td>
+                                <td>{{ reit.movimento }}</td>
+                                <td>${{ "%.2f"|format(reit.preco_inicial) }}</td>
+                                <td>{{ reit.quantidade_inicial }}</td>
+                                <td>
+                                    {% set balance = reit.preco_inicial * reit.quantidade_inicial %}
+                                    {% if reit.movimento == 'Compra' %}
+                                        <span style="color: #d9534f;">-${{ "%.2f"|format(balance) }}</span>
+                                    {% elif reit.movimento == 'Venda' %}
+                                        <span style="color: #5cb85c;">+${{ "%.2f"|format(balance) }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ url_for('delete_reit', id=reit.id) }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

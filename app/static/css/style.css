@@ -1,0 +1,323 @@
+/* Basic Styles and Layout */
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.top-bar, .footer {
+    flex-shrink: 0;
+}
+
+.footer {
+    height: 50px; /* Smaller height for footer */
+    line-height: 20px; /* Vertically center text */
+}
+
+
+/* Metric Containers Styles */
+.metric-container {
+    display: flex;
+    align-items: center;
+    background-color: #f7f7f7; /* Light grey background for metric containers */
+    border-radius: 8px;
+    margin: 10px 0;
+    padding: 10px;
+    transition: box-shadow 0.3s ease;
+}
+
+.metric-container:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle hover effect */
+}
+
+.metric-icon-container {
+    width: 40px; /* Adjust size as necessary */
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.metric-icon {
+    width: 30px;
+    height: auto;
+}
+
+.metric-title {
+    text-align: left;
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 15px;
+    font-size: 0.7rem;
+    color: #666; 
+    margin-bottom: 0px;
+}
+
+.metric-value {
+    text-align: left;
+    margin-right: 10px;
+    margin-left: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Dividends List Style */
+.dividends-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dividend-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.dividend-item img {
+    margin-right: 10px;
+}
+
+/* General Card Styles */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+/* Styles for Investment Performance Section (dashboard.html) */
+.investment-performance-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.investment-row, .acquisition-row{ /* Apply same style to both sections */
+    background-color: #fff;
+    border-radius: 8px;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0rem;
+}
+
+.investment-cell, .acquisition-cell { /* Same style for cells in both sections */
+    display: flex;
+    flex-direction: column;
+}
+
+.investment-cell-icon-ticker, .acquisition-cell-icon-ticker { /* Same style for icon and ticker in both sections */
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: row;
+}
+
+.investment-icon, .acquisition-icon { /* Same style for icons in both sections */
+    width: 30px;
+    height: 30px;
+    align-self: center;
+}
+
+.investment-ticker, .acquisition-ticker { /* Same style for tickers in both sections */
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.metric-title {
+    font-size: 0.7rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.6rem;
+}
+
+/* Responsive Design Media Queries */
+@media (max-width: 768px) {
+    .investment-row, .acquisition-row {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Responsive grid layout */
+    }
+}
+
+/* KPI Card Styles (dashboard.html) */
+.kpi-card {
+    background: #FFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.kpi-card-body {
+    text-align: right;
+}
+
+.kpi-icon {
+    width: 30px; /* Medium size for the icon */
+    height: auto;
+    margin-left: 15px;
+    margin-bottom: 20px;
+}
+
+.kpi-title {
+    font-size: 10px;
+    color: #6c757d; /* Discreet color */
+    margin-bottom: 5px;
+}
+
+.kpi-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333; /* Black color for value */
+}
+
+.kpi-chart-container {
+    height: 60px; /* Height for Sparkline graph */
+    margin-top: 10px;
+}
+
+#refreshButton {
+    width: 150px; /* Button width */
+    text-align: center; /* Center button content */
+    transition: all 0.3s ease; /* Smooth transition for style changes */
+}
+
+#refreshButton i {
+    margin-right: 5px; /* Space between icon and text */
+}
+
+#refreshButton.active i.fa-sync-alt {
+    animation: spin 1s linear infinite; /* Spinning animation for the refresh icon */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.footer {
+    height: 50px; /* Smaller height for the footer */
+    line-height: 20px; /* Vertically center the text */
+}
+
+.truncate-1-line {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncate text to a single line */
+}
+
+.small-date {
+    font-size: 0.7em;
+    font-weight: normal; /* Styling example for small date text */
+}
+
+/* Styling text and list inside 'info-text' */
+.info-text, .info-text li {
+    font-size: 0.6rem; /* Font size as in metric titles */
+    color: #6c757d; /* Grey color for text */
+}
+
+.info-text ul {
+    padding-left: 20px; /* Adds indentation to the list */
+}
+
+.info-text li {
+    line-height: 1.4; /* Line spacing */
+    margin-bottom: 0.5rem; /* Spacing between list items */
+}
+
+.info-text i {
+    font-size: 0.8rem; /* Adjust icon size as needed */
+    vertical-align: middle; /* Vertically align the icon with the text */
+    margin-right: 0.5rem; /* Space between icon and text */
+}
+
+/* Specific styles for 'Upcoming Acquisitions' */
+.acquisition-cell.rank-cell {
+    grid-column: span 1; /* Span half the space of normal cells */
+}
+
+.acquisition-cell.name-cell {
+    grid-column: span 1; /* Span two times the space of normal cells */
+}
+
+.acquisition-cell.date-cell {
+    grid-column: span 1; /* Span two times the space of normal cells */
+}
+
+.dividend-chart-container {
+    height: 100px; /* Height for Sparkline graph */
+    margin-top: 15px;
+}
+
+#progressBarContainer {
+    position: fixed;
+    top: 56px; /* Adjust based on the height of your navbar */
+    left: 0;
+    right: 0;
+    z-index: 1030; /* Higher than the navbar */
+}
+
+#successMessage {
+    position: fixed;
+    top: 70px; /* Adjust based on the height of your navbar and progress bar */
+    right: 20px;
+    z-index: 1031; /* Higher than the progress bar */
+}
+
+
+@media screen and (max-width: 992px) {
+    .navbar-collapse {
+        flex-basis: 100%;
+        flex-grow: 1;
+        justify-content: flex-end;
+    }
+}
+
+.navbar .nav-link {
+    color: white; /* Cor do ícone */
+    font-size: 16px; /* Tamanho do ícone */
+}
+
+/* Estilização para os ícones ao lado esquerdo */
+.navbar-nav .nav-item {
+    margin-right: 15px;
+    margin-left: 15px; /* Espaçamento entre os ícones */
+}
+
+/* Estilização para os ícones ao lado direito */
+.navbar-nav.ms-auto .nav-item {
+    margin-right: 0px;
+    margin-left: 0px; /* Espaçamento entre os ícones */
+}

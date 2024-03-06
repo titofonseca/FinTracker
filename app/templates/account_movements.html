@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Form for data entry -->
+            <div class="col-lg-6">
+                <div class="my-4">
+                    <h2>Add Account Movement</h2>
+                    <form method="post" action="{{ url_for('account_movements') }}" class="p-3 border rounded">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="data" class="form-control" required placeholder="Enter the date of the movement">
+                        </div>
+                        <div class="form-group">
+                            <label for="movement">Movement</label>
+                            <select id="movement" name="movimento" class="form-control" required>
+                                <option value="Deposit">Deposit</option>
+                                <option value="Withdraw">Withdraw</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" class="form-control" step="0.01" required placeholder="Enter the amount in USD">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Movement</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Table to display account movements history -->
+            <div class="col-lg-6">
+                <div class="my-4">
+                    <h2>Account Movements History</h2>
+                    <table class="table table-hover transaction-history-table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Movement</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movement in movements %}
+                            <tr>
+                                <td>{{ movement.data }}</td>
+                                <td>{{ movement.movimento }}</td>
+                                <td>${{ "%.2f"|format(movement.amount) }}</td>
+                                <td>
+                                    <form method="post" action="{{ url_for('delete_account_movement', id=movement.id) }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
